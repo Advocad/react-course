@@ -2,41 +2,26 @@ import React from 'react'; // подключение библиотеки React
 import './App.css'; // подключение файла стилей
 import { Add } from './components/AddNews';
 import { News } from './components/News';
-// далее скопировано из тэга script
-
-const myNews = [
-  {
-    id: 1,
-    author: 'Саша Печкин',
-    text: 'В четверг, четвертого числа...',
-    bigText:
-      'в четыре с четвертью часа четыре чёрненьких чумазеньких чертёнка чертили чёрными чернилами чертёж.',
-  },
-  {
-    id: 2,
-    author: 'Просто Вася',
-    text: 'Считаю, что $ должен стоить 35 рублей!',
-    bigText: 'А евро 42!',
-  },
-  {
-    id: 3,
-    author: 'Max Frontend',
-    text: 'Прошло 2 года с прошлых учебников, а $ так и не стоит 35',
-    bigText: 'А евро опять выше 70.',
-  },
-  {
-    id: 4,
-    author: 'Гость',
-    text: 'Бесплатно. Без смс, про реакт, заходи - https://maxpfrontend.ru',
-    bigText:
-      'Еще есть группа VK, telegram и канал на youtube! Вся инфа на сайте, не реклама!',
-  },
-];
 
 class App extends React.Component {
   state = {
-    news: myNews,
+    news: null,
+    isLoading: false,
   };
+
+  componentDidMount() {
+    this.setState({ isLoading: true });
+
+    fetch('http://localhost:3000/data/DataNews.json')
+      .then((response) => response.json())
+      .then((data) => {
+        this.setState({
+          news: data,
+          isLoading: false,
+        });
+      });
+  }
+
 
   handleAddNews = (data) => {
     const nextNews = [data, ...this.state.news];
@@ -44,11 +29,14 @@ class App extends React.Component {
   };
 
   render() {
+    const { news, isLoading } = this.state;
+
     return (
       <React.Fragment>
         <Add onAddNews={this.handleAddNews} />
         <h3>Новости</h3>
-        <News data={this.state.news} />
+        {isLoading && <p>Загружаю...</p>}
+        {Array.isArray(news) && <News data={news} />}
       </React.Fragment>
     );
   }
